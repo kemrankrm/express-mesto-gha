@@ -2,7 +2,12 @@ const Users = require('../models/users');
 
 module.exports.getUsers = (req, res) => {
   Users.find({})
-    .then((item) => res.send(item))
+    .then((users) => {
+      // if (!users) {
+      //   res.status(404).send({ message: 'Users are not found' })
+      // }
+      res.send(users)
+    })
     .catch((err) => res.send(err));
 };
 

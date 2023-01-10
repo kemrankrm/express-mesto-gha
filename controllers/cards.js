@@ -2,7 +2,14 @@ const Cards = require('../models/cards');
 
 module.exports.getCards = (req, res) => {
   Cards.find({})
-    .then((cards) => res.send(cards))
+    .then((cards) => {
+        if (!cards.length) {
+            throw new Error();
+        } else {
+            res.sendStatus(200);
+            res.send(cards)
+        }
+    })
     .catch((err) => res.send(err));
 };
 
