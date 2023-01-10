@@ -1,12 +1,19 @@
 const Users = require('../models/users');
 
+const {
+  SUCCESS_CODE_200,
+  ERROR_CODE_400,
+  ERROR_CODE_404
+} = require('../utils/utils')
+
 module.exports.getUsers = (req, res) => {
   Users.find({})
     .then((users) => {
-      // if (!users) {
-      //   res.status(404).send({ message: 'Users are not found' })
-      // }
-      res.send(users);
+      if (users > 10) {
+        return res.status(ERROR_CODE_404).send({ message: 'Users are not found' });
+      }
+      res.status(SUCCESS_CODE_200).send(users)
+      
     })
     .catch((err) => res.send(err));
 };

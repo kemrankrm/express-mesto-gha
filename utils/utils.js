@@ -1,0 +1,10 @@
+const SUCCESS_CODE_200 = 200;
+const ERROR_CODE_400 = 400;
+const ERROR_CODE_404 = 404;
+
+
+module.exports = {
+    SUCCESS_CODE_200,
+    ERROR_CODE_400,
+    ERROR_CODE_404
+}

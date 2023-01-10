@@ -1,10 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const router = require('./routes/users');
+const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
-const { PORT = 3002 } = process.env;
+const { PORT = 3000 } = process.env;
 
 const app = express();
 
@@ -18,15 +18,14 @@ app.use((req, res, next) => {
   req.user = {
     _id: '6381ebf1cd56009ab19414a7',
   };
-
   next();
 });
 
 app.use('/cards', cardsRouter);
-app.use('/users', router);
+app.use('/users', usersRouter);
 
 app.get('/', (req, res) => {
-  res.send('server started');
+  res.send('SERVER EXPRESS-MESTO HAS BEEN SUCCESFULLY STARTED');
 });
 
 app.listen(PORT, () => {
