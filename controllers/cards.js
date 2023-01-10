@@ -2,13 +2,14 @@ const Cards = require('../models/cards');
 
 module.exports.getCards = (req, res) => {
   Cards.find({})
+    .populate('owner')
     .then((cards) => {
       if (!cards.length) {
-        throw new Error();
-      } else {
-        res.sendStatus(200);
-        res.send(cards);
-      }
+        return res.status(400).send('нет карт')
+      } 
+
+      res.status(200).send(cards)
+
     })
     .catch((err) => res.send(err));
 };
