@@ -1,17 +1,16 @@
 const Cards = require('../models/cards');
+const { returnError } = require('../scripts/utils/utils');
 
 module.exports.getCards = (req, res) => {
   Cards.find({})
-    .populate('owner')
+    // .populate('user') // TODO: НЕ СМОГ ОТКЛЮЧИТЬ STRICT-POPULATE
     .then((cards) => {
       if (!cards.length) {
-        return res.status(400).send('нет карт')
-      } 
-
-      res.status(200).send(cards)
-
+        return res.status(200).send('Карты в коллекции базы данных нет :(');
+      }
+      return res.status(200).send(cards);
     })
-    .catch((err) => res.send(err));
+    .catch((err) => returnError(err, 'user', res));
 };
 
 module.exports.createCard = (req, res) => {
@@ -19,7 +18,7 @@ module.exports.createCard = (req, res) => {
 
   Cards.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
-    .catch((err) => res.send(err));
+    .catch((err) => returnError(err, 'card', res));
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -27,7 +26,7 @@ module.exports.deleteCard = (req, res) => {
 
   Cards.findByIdAndDelete(cardId)
     .then((item) => res.send(`Card ${item} deleted`))
-    .catch((err) => res.send(err));
+    .catch((err) => returnError(err, 'card', res, cardId));
 };
 
 module.exports.likeCard = (req, res) => {
@@ -39,7 +38,7 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send(card))
-    .catch((err) => res.send(err));
+    .catch((err) => returnError(err, 'card', res, cardId));
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -51,5 +50,5 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send(card))
-    .catch((err) => res.send(err));
+    .catch((err) => returnError(err, 'card', res, cardId));
 };

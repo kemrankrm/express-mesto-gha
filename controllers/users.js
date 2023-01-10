@@ -1,22 +1,19 @@
 const Users = require('../models/users');
+const { CollectionEmptyError } = require('../scripts/components/CollectionEmptyError');
 
 const {
   SUCCESS_CODE_200,
-  ERROR_CODE_400,
-  ERROR_CODE_404,
-} = require('../utils/utils');
+  returnError,
+} = require('../scripts/utils/utils');
 
 module.exports.getUsers = (req, res) => {
   Users.find({})
+    .orFail(() => {
+      throw new CollectionEmptyError();
+    })
     .then((users) => {
       if (!users.length) {
-        // return res.status(ERROR_CODE_404).send({ message: 'Users are not found' });
-
-        const err = new Error('Объект не найден'); // создаём стандартную ошибку с текстом "Объект не найден"
-        err.name = 'NotFoundError'; // задаём NotFoundError в качестве имени ошибки
-        console.log(err.name); // убедимся, что имя сохранилось внутри объекта ошибки
-
-        throw err;
+        return res.status(400).send({ message: 'Пользователей нет в базе данных' });
       }
 
       return res.status(SUCCESS_CODE_200).send(users);
@@ -31,7 +28,7 @@ module.exports.createUser = (req, res) => {
     .then((user) => {
       res.send(user);
     })
-    .catch((err) => res.send(err));
+    .catch((err) => returnError(err, 'user', res));
 };
 
 module.exports.getProfile = (req, res) => {
@@ -39,19 +36,31 @@ module.exports.getProfile = (req, res) => {
 
   Users.findById(id)
     .then((user) => { res.send(user); })
-    .catch((err) => res.send(err));
+    .catch((err) => returnError(err, 'user', res));
 };
 
 module.exports.editProfile = (req, res) => {
   const { name, about } = req.body;
+  console.log(req.body);
+
+  console.log('ID ===', req.user._id);
 
   Users.findByIdAndUpdate(
     req.user._id,
-    { name, about },
-    { new: true },
+    {
+      name: name || '',
+      about: about || '',
+    },
+    {
+      runValidators: true,
+      new: true,
+    },
   )
+    .orFail(() => {
+      throw new Error();
+    })
     .then((user) => res.send(user))
-    .catch((err) => res.send(err));
+    .catch((err) => returnError(err, 'profile', res, req.user._id));
 };
 
 module.exports.editAvatar = (req, res) => {
@@ -59,9 +68,16 @@ module.exports.editAvatar = (req, res) => {
 
   Users.findByIdAndUpdate(
     req.user._id,
-    { avatar },
-    { new: true },
+    { avatar: avatar || '' },
+    {
+      runValidators: true,
+      new: true,
+    },
+
   )
+    .orFail(() => {
+      throw new Error();
+    })
     .then((user) => res.send(`Updated user profile ${user}`))
-    .catch((err) => res.send(err));
+    .catch((err) => returnError(err, 'avatar', res, req.user._id));
 };
