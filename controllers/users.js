@@ -6,7 +6,7 @@ module.exports.getUsers = (req, res) => {
       // if (!users) {
       //   res.status(404).send({ message: 'Users are not found' })
       // }
-      res.send(users)
+      res.send(users);
     })
     .catch((err) => res.send(err));
 };
