@@ -1,5 +1,5 @@
 const Cards = require('../models/cards');
-const { returnError } = require('../scripts/utils/utils');
+const { returnError, isObjectIdValid, ERROR_CODE_400 } = require('../scripts/utils/utils');
 
 module.exports.getCards = (req, res) => {
   Cards.find({})
@@ -30,9 +30,13 @@ module.exports.deleteCard = (req, res) => {
     .catch((err) => returnError(err, 'card', res, cardId));
 };
 
+// eslint-disable-next-line consistent-return
 module.exports.likeCard = (req, res) => {
   const { cardId } = req.params;
 
+  if (!isObjectIdValid(cardId)) {
+    return res.status(ERROR_CODE_400).send('Переданы некорректные данные для постановки/снятии лайка');
+  }
   Cards.findByIdAndUpdate(
     cardId,
     { $addToSet: { likes: req.user._id } },

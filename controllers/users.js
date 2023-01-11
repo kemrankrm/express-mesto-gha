@@ -50,7 +50,7 @@ module.exports.getProfile = (req, res) => {
 
 module.exports.editProfile = (req, res) => {
   if (!isObjectIdValid(req.user._id)) {
-    return res.status(ERROR_CODE_400).res.send({ message: 'User не найден' })
+    return res.status(ERROR_CODE_400).res.send({ message: 'User не найден' });
   }
 
   Users.findByIdAndUpdate(
