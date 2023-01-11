@@ -8,9 +8,9 @@ module.exports.getCards = (req, res) => {
     .populate(['owner', 'likes'])
     .then((cards) => {
       if (!cards.length) {
-        return res.status(404).send({ message: 'Карты в коллекции базы данных нет :(' });
+        return res.status(ERROR_CODE_404).send({ message: 'Нет карточек в БД' });
       }
-      return res.status(200).send(cards);
+      return res.status(SUCCESS_CODE_200).send(cards);
     })
     .catch((err) => returnError(err, 'user', res));
 };
