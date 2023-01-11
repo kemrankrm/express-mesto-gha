@@ -3,7 +3,7 @@ const { CollectionEmptyError } = require('../scripts/components/CollectionEmptyE
 
 const {
   SUCCESS_CODE_200,
-  returnError, validateObjectId, ERROR_CODE_400, ERROR_CODE_404, isObjectIdValid,
+  returnError, ERROR_CODE_400, ERROR_CODE_404, isObjectIdValid,
 } = require('../scripts/utils/utils');
 
 module.exports.getUsers = (req, res) => {
@@ -30,6 +30,7 @@ module.exports.createUser = (req, res) => {
     .catch((err) => returnError(err, 'user', res));
 };
 
+// eslint-disable-next-line consistent-return
 module.exports.getProfile = (req, res) => {
   const { id } = req.params;
 
@@ -48,7 +49,6 @@ module.exports.getProfile = (req, res) => {
 };
 
 module.exports.editProfile = (req, res) => {
-
   Users.findByIdAndUpdate(
     { _id: isObjectIdValid(req.user._id) },
     {
