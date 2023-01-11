@@ -1,6 +1,6 @@
 const Cards = require('../models/cards');
 const {
-  returnError, isObjectIdValid, ERROR_CODE_400, ERROR_CODE_404,
+  returnError, isObjectIdValid, ERROR_CODE_400, ERROR_CODE_404, SUCCESS_CODE_200,
 } = require('../scripts/utils/utils');
 
 module.exports.getCards = (req, res) => {
@@ -36,7 +36,9 @@ module.exports.deleteCard = (req, res) => {
       res.status(ERROR_CODE_404).send({ message: `Передан несуществующий id (${cardId}) карточки` });
     })
     .populate(['owner', 'likes'])
-    .then((card) => res.send(card))
+    .then((card) => {
+      res.status(SUCCESS_CODE_200).send(card);
+    })
     .catch((err) => returnError(err, 'card', res, cardId));
 };
 
@@ -60,6 +62,7 @@ module.exports.likeCard = (req, res) => {
     .catch((err) => returnError(err, 'card', res, cardId));
 };
 
+// eslint-disable-next-line consistent-return
 module.exports.dislikeCard = (req, res) => {
   const { cardId } = req.params;
 
