@@ -8,7 +8,7 @@ module.exports.getCards = (req, res) => {
     .populate(['owner', 'likes'])
     .then((cards) => {
       if (!cards.length) {
-        return res.status(ERROR_CODE_404).send({ });
+        return res.status(ERROR_CODE_404).send([]);
       }
       return res.status(SUCCESS_CODE_200).send(cards);
     })
@@ -37,7 +37,7 @@ module.exports.deleteCard = (req, res) => {
     })
     .populate(['owner', 'likes'])
     .then((card) => {
-      res.status(SUCCESS_CODE_200).send({ });
+      res.status(SUCCESS_CODE_200).send(card);
     })
     .catch((err) => returnError(err, 'card', res, cardId));
 };
