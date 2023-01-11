@@ -49,8 +49,12 @@ module.exports.getProfile = (req, res) => {
 };
 
 module.exports.editProfile = (req, res) => {
+  if (!isObjectIdValid(req.user._id)) {
+    return res.status(ERROR_CODE_400).res.send({ message: 'User не найден' })
+  }
+
   Users.findByIdAndUpdate(
-    { _id: isObjectIdValid(req.user._id) },
+    { _id: req.user._id },
     {
       name: req.body.name || '',
       about: req.body.about || '',
@@ -79,11 +83,10 @@ module.exports.editAvatar = (req, res) => {
       runValidators: true,
       new: true,
     },
-
   )
     .orFail(() => {
       throw new Error();
     })
-    .then((user) => res.send(`Updated user profile ${user}`))
+    .then((user) => res.send(user))
     .catch((err) => returnError(err, 'avatar', res, req.user._id));
 };
