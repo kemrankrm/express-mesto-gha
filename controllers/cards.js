@@ -8,7 +8,7 @@ module.exports.getCards = (req, res) => {
     .populate(['owner', 'likes'])
     .then((cards) => {
       if (!cards.length) {
-        return res.status(200).send({ message: 'Карты в коллекции базы данных нет :(' });
+        return res.status(404).send({ message: 'Карты в коллекции базы данных нет :(' });
       }
       return res.status(200).send(cards);
     })
