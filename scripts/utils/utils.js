@@ -1,9 +1,12 @@
+const mongoose = require('mongoose');
+
 const SUCCESS_CODE_200 = 200;
 const ERROR_CODE_400 = 400;
 const ERROR_CODE_404 = 404;
 const ERROR_CODE_500 = 500;
 
 const returnError = (err, schema, res, id) => {
+  // console.log(`name: ${err.name} \nmessage: ${err.message} \nError: ${err}`)
   if (err.name === 'ValidationError') {
     switch (schema) {
       case 'user':
@@ -31,9 +34,19 @@ const returnError = (err, schema, res, id) => {
   return res.status(ERROR_CODE_500).send('Что-то пошло не так...');
 };
 
+const isObjectIdValid = (id) => mongoose.Types.ObjectId.isValid(id);
+
+const validateObjectId = (id) => {
+  return isObjectIdValid(id)
+    ? mongoose.Types.ObjectId(id)
+    : mongoose.Types.ObjectId(Number(id));
+};
+
 module.exports = {
   SUCCESS_CODE_200,
   ERROR_CODE_400,
   ERROR_CODE_404,
   returnError,
+  validateObjectId,
+  isObjectIdValid,
 };

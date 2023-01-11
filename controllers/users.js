@@ -3,7 +3,7 @@ const { CollectionEmptyError } = require('../scripts/components/CollectionEmptyE
 
 const {
   SUCCESS_CODE_200,
-  returnError,
+  returnError, validateObjectId, ERROR_CODE_400, ERROR_CODE_404, isObjectIdValid,
 } = require('../scripts/utils/utils');
 
 module.exports.getUsers = (req, res) => {
@@ -15,7 +15,6 @@ module.exports.getUsers = (req, res) => {
       if (!users.length) {
         return res.status(400).send({ message: 'Пользователей нет в базе данных' });
       }
-
       return res.status(SUCCESS_CODE_200).send(users);
     })
     .catch((err) => res.status(404).send(err));
@@ -34,22 +33,27 @@ module.exports.createUser = (req, res) => {
 module.exports.getProfile = (req, res) => {
   const { id } = req.params;
 
+  if (!isObjectIdValid(id)) {
+    return res.status(ERROR_CODE_400).send({ message: `Передан невалидный ID пользователя ${id}` });
+  }
+
   Users.findById(id)
-    .then((user) => { res.send(user); })
+    .then((user) => {
+      if (!user) {
+        return res.status(ERROR_CODE_404).send({ message: `Пользователь по указанному id:${id} не найден` });
+      }
+      return res.status(SUCCESS_CODE_200).send(user);
+    })
     .catch((err) => returnError(err, 'user', res));
 };
 
 module.exports.editProfile = (req, res) => {
-  const { name, about } = req.body;
-  console.log(req.body);
-
-  console.log('ID ===', req.user._id);
 
   Users.findByIdAndUpdate(
-    req.user._id,
+    { _id: isObjectIdValid(req.user._id) },
     {
-      name: name || '',
-      about: about || '',
+      name: req.body.name || '',
+      about: req.body.about || '',
     },
     {
       runValidators: true,
@@ -57,9 +61,11 @@ module.exports.editProfile = (req, res) => {
     },
   )
     .orFail(() => {
-      throw new Error();
+      throw new Error('User is not found');
     })
-    .then((user) => res.send(user))
+    .then((user) => {
+      res.status(SUCCESS_CODE_200).send(user);
+    })
     .catch((err) => returnError(err, 'profile', res, req.user._id));
 };
 
