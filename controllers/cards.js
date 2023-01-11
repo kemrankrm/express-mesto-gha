@@ -1,5 +1,7 @@
 const Cards = require('../models/cards');
-const { returnError, isObjectIdValid, ERROR_CODE_400 } = require('../scripts/utils/utils');
+const {
+  returnError, isObjectIdValid, ERROR_CODE_400, ERROR_CODE_404,
+} = require('../scripts/utils/utils');
 
 module.exports.getCards = (req, res) => {
   Cards.find({})
@@ -21,12 +23,20 @@ module.exports.createCard = (req, res) => {
     .catch((err) => returnError(err, 'card', res));
 };
 
+// eslint-disable-next-line consistent-return
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
 
+  if (!isObjectIdValid(cardId)) {
+    return res.status(ERROR_CODE_400).send({ message: `Передан некорректный id (${cardId}) карточки для ее удаления` });
+  }
+
   Cards.findByIdAndDelete(cardId)
+    .orFail(() => {
+      res.status(ERROR_CODE_404).send({ message: `Передан несуществующий id (${cardId}) карточки` });
+    })
     .populate(['owner', 'likes'])
-    .then((item) => res.send(`Card ${item} deleted`))
+    .then((card) => res.send(card))
     .catch((err) => returnError(err, 'card', res, cardId));
 };
 
@@ -35,13 +45,16 @@ module.exports.likeCard = (req, res) => {
   const { cardId } = req.params;
 
   if (!isObjectIdValid(cardId)) {
-    return res.status(ERROR_CODE_400).send('Переданы некорректные данные для постановки/снятии лайка');
+    return res.status(ERROR_CODE_400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка' });
   }
   Cards.findByIdAndUpdate(
     cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      res.status(ERROR_CODE_404).send({ message: `Передан несуществующий id (${cardId}) карточки` });
+    })
     .populate(['owner', 'likes'])
     .then((card) => res.send(card))
     .catch((err) => returnError(err, 'card', res, cardId));

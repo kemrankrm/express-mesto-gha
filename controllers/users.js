@@ -48,6 +48,7 @@ module.exports.getProfile = (req, res) => {
     .catch((err) => returnError(err, 'user', res));
 };
 
+// eslint-disable-next-line consistent-return
 module.exports.editProfile = (req, res) => {
   if (!isObjectIdValid(req.user._id)) {
     return res.status(ERROR_CODE_400).res.send({ message: 'User не найден' });
