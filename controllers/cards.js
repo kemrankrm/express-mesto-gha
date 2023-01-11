@@ -31,7 +31,7 @@ module.exports.deleteCard = (req, res) => {
     return res.status(ERROR_CODE_400).send({ message: `Передан некорректный id (${cardId}) карточки для ее удаления` });
   }
 
-  Cards.findByIdAndDelete(cardId)
+  Cards.deleteOne({ _id: cardId })
     .orFail(() => {
       res.status(ERROR_CODE_404).send({ message: `Передан несуществующий id (${cardId}) карточки` });
     })
