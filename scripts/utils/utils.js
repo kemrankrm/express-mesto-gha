@@ -36,15 +36,10 @@ const returnError = (err, schema, res, id) => {
 
 const isObjectIdValid = (id) => mongoose.Types.ObjectId.isValid(id);
 
-const validateObjectId = (id) => (isObjectIdValid(id)
-  ? mongoose.Types.ObjectId(id)
-  : mongoose.Types.ObjectId(Number(id)));
-
 module.exports = {
   SUCCESS_CODE_200,
   ERROR_CODE_400,
   ERROR_CODE_404,
   returnError,
-  validateObjectId,
   isObjectIdValid,
 };

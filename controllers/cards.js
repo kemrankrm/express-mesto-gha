@@ -8,7 +8,7 @@ module.exports.getCards = (req, res) => {
     .populate(['owner', 'likes'])
     .then((cards) => {
       if (!cards.length) {
-        return res.status(ERROR_CODE_404).send({});
+        return res.status(ERROR_CODE_404).send();
       }
       return res.status(SUCCESS_CODE_200).send(cards);
     })
