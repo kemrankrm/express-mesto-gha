@@ -4,8 +4,6 @@ const ERROR_CODE_404 = 404;
 const ERROR_CODE_500 = 500;
 
 const returnError = (err, schema, res, id) => {
-  console.log('ERROR FUNCTION PROCESSED ===', err);
-
   if (err.name === 'ValidationError') {
     switch (schema) {
       case 'user':

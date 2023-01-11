@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/kemrankrm/express-mesto-gha.git"
   },
-  "author": "",
+  "author": "Kemran Karimov",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/kemrankrm/express-mesto-gha/issues"
