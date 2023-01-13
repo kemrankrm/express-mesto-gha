@@ -3,11 +3,13 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const { apiLimiter } = require('./scripts/utils/utils');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3010 } = process.env;
 
 const app = express();
 
+app.use('/api/', apiLimiter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

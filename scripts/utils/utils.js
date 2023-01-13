@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
 
 const SUCCESS_CODE_200 = 200;
 const ERROR_CODE_400 = 400;
 const ERROR_CODE_404 = 404;
 const ERROR_CODE_500 = 500;
+const PERIOD_MINUTES_10 = 600000;
 
 const returnError = (err, schema, res, id) => {
   // console.log(`name: ${err.name} \nmessage: ${err.message} \nError: ${err}`)
@@ -36,10 +38,19 @@ const returnError = (err, schema, res, id) => {
 
 const isObjectIdValid = (id) => mongoose.Types.ObjectId.isValid(id);
 
+const apiLimiter = rateLimit({
+  windowMs: PERIOD_MINUTES_10,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 module.exports = {
   SUCCESS_CODE_200,
   ERROR_CODE_400,
   ERROR_CODE_404,
+  PERIOD_MINUTES_10,
   returnError,
   isObjectIdValid,
+  apiLimiter,
 };

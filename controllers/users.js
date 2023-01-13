@@ -13,7 +13,7 @@ module.exports.getUsers = (req, res) => {
     })
     .then((users) => {
       if (!users.length) {
-        return res.status(400).send({ message: 'Пользователей нет в базе данных' });
+        return res.status(400).send(users);
       }
       return res.status(SUCCESS_CODE_200).send(users);
     })
