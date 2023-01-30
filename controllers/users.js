@@ -1,12 +1,15 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const Users = require('../models/users');
 const { CollectionEmptyError } = require('../scripts/components/CollectionEmptyError');
 
 const {
   SUCCESS_CODE_200,
-  returnError, ERROR_CODE_400, ERROR_CODE_404, isObjectIdValid,
+  isObjectIdValid,
 } = require('../scripts/utils/utils');
+const { RequestError, NotFoundError, AuthorizationError } = require('../scripts/utils/errors');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   Users.find({})
     .orFail(() => {
       throw new CollectionEmptyError();
@@ -17,43 +20,48 @@ module.exports.getUsers = (req, res) => {
       }
       return res.status(SUCCESS_CODE_200).send(users);
     })
-    .catch((err) => res.status(404).send(err));
+    .catch((err) => next(new NotFoundError('Not Found')));
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+module.exports.createUser = (req, res, next) => {
+  console.log('Creat USER WORKED WELL');
 
-  Users.create({ name, about, avatar })
-    .then((user) => {
-      res.send(user);
-    })
-    .catch((err) => returnError(err, 'user', res));
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+
+  bcrypt.hash(password, 10)
+    .then((hash) => Users.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then((user) => res.send({ email: user.email, id: user._id }))
+    .catch((err) => next(new RequestError('Неккоректный запрос')));
 };
 
 // eslint-disable-next-line consistent-return
-module.exports.getProfile = (req, res) => {
+module.exports.getProfile = (req, res, next) => {
   const { id } = req.params;
-
   if (!isObjectIdValid(id)) {
-    return res.status(ERROR_CODE_400).send({ message: `Передан невалидный ID пользователя ${id}` });
+    throw new RequestError(`Передан невалидный ID пользователя ${id}`);
   }
 
   Users.findById(id)
     .then((user) => {
       if (!user) {
-        return res.status(ERROR_CODE_404).send({ message: `Пользователь по указанному id:${id} не найден` });
+        throw new NotFoundError(`Пользователь по указанному id:${id} не найден`);
       }
       return res.status(SUCCESS_CODE_200).send(user);
     })
-    .catch((err) => returnError(err, 'user', res));
+    .catch(next);
 };
 
 // eslint-disable-next-line consistent-return
-module.exports.editProfile = (req, res) => {
+module.exports.editProfile = (req, res, next) => {
+  console.log('EDIT PROFILE WORKED');
   if (!isObjectIdValid(req.user._id)) {
-    return res.status(ERROR_CODE_400).res.send({ message: 'User не найден' });
+    // return res.status(ERROR_CODE_400).res.send({ message: 'User не найден' });
+    throw new RequestError('Некорректные данные');
   }
-
   Users.findByIdAndUpdate(
     { _id: req.user._id },
     {
@@ -66,15 +74,15 @@ module.exports.editProfile = (req, res) => {
     },
   )
     .orFail(() => {
-      throw new Error('User is not found');
+      throw new NotFoundError('User is not found');
     })
     .then((user) => {
       res.status(SUCCESS_CODE_200).send(user);
     })
-    .catch((err) => returnError(err, 'profile', res, req.user._id));
+    .catch(next);
 };
 
-module.exports.editAvatar = (req, res) => {
+module.exports.editAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   Users.findByIdAndUpdate(
@@ -86,8 +94,34 @@ module.exports.editAvatar = (req, res) => {
     },
   )
     .orFail(() => {
-      throw new Error();
+      throw new NotFoundError('User не найден');
     })
     .then((user) => res.send(user))
-    .catch((err) => returnError(err, 'avatar', res, req.user._id));
+    .catch(next);
+};
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return Users.findUserByCredentials(email, password)
+    .then((user) => {
+      res
+        .status(SUCCESS_CODE_200)
+        .send({
+          token: jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' }),
+        });
+    })
+    .catch(next);
+};
+
+module.exports.getCurrentProfile = (req, res, next) => {
+  Users.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new AuthorizationError('Ошибка авторизации');
+      }
+
+      return res.status(SUCCESS_CODE_200).send(user);
+    })
+    .catch(next);
 };

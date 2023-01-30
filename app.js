@@ -1,9 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors, celebrate, Joi } = require('celebrate');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const { apiLimiter } = require('./scripts/utils/utils');
+const { login, createUser } = require('./controllers/users');
+const { auth } = require('./middlewares/auth');
+const { catchErrors } = require('./middlewares/errors');
 
 const { PORT = 3000 } = process.env;
 
@@ -15,12 +19,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '63bd375965bc0202152c0e6f',
-  };
-  next();
-});
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required().min(8),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required().min(8),
+  }).unknown(true),
+}), createUser);
+
+app.use(auth);
 
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
@@ -29,8 +41,12 @@ app.use('*', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('SERVER EXPRESS-MESTO HAS BEEN SUCCESFULLY STARTED');
+  res.send('SERVER EXPRESS-MESTO HAS BEEN SUCCESSFULLY STARTED');
 });
+
+app.use(errors());
+
+app.use(catchErrors);
 
 app.listen(PORT, () => {
   console.log('SERVER RUNS ON PORT', PORT);

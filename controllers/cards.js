@@ -1,9 +1,17 @@
 const Cards = require('../models/cards');
+
 const {
-  returnError, isObjectIdValid, ERROR_CODE_400, ERROR_CODE_404, SUCCESS_CODE_200,
+  isObjectIdValid,
+  SUCCESS_CODE_200,
 } = require('../scripts/utils/utils');
 
-module.exports.getCards = (req, res) => {
+const {
+  NotFoundError,
+  RequestError,
+  AuthorizationError,
+} = require('../scripts/utils/errors');
+
+module.exports.getCards = (req, res, next) => {
   Cards.find({})
     .populate(['owner', 'likes'])
     .then((cards) => {
@@ -12,42 +20,56 @@ module.exports.getCards = (req, res) => {
       }
       return res.status(SUCCESS_CODE_200).send(cards);
     })
-    .catch((err) => returnError(err, 'user', res));
+    .catch((err) => next(new NotFoundError('Карточки не найдены')));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Cards.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
-    .catch((err) => returnError(err, 'card', res));
+    .catch((err) => next(new RequestError('Введены неверные данные')));
 };
 
 // eslint-disable-next-line consistent-return
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
   if (!isObjectIdValid(cardId)) {
-    return res.status(ERROR_CODE_400).send({ message: `Передан некорректный id (${cardId}) карточки для ее удаления` });
+    throw new RequestError(`Передан некорректный id (${cardId}) карточки для ее удаления`);
   }
 
-  Cards.deleteOne({ _id: cardId })
+  Cards.findById(cardId)
     .orFail(() => {
-      res.status(ERROR_CODE_404).send({ message: `Передан несуществующий id (${cardId}) карточки` });
+      throw new NotFoundError(`Передан несуществующий id (${cardId}) карточки`);
     })
     .populate(['owner', 'likes'])
     .then((card) => {
-      res.status(SUCCESS_CODE_200).send(card);
+      const cardOwnerId = JSON.stringify(card.owner._id);
+      const currentUserId = `"${req.user._id}"`;
+
+      if (cardOwnerId !== currentUserId) {
+        throw new AuthorizationError('Нет прав на удаление этой карты');
+      }
+
+      Cards.deleteOne({ _id: cardId })
+        .orFail(() => {
+          throw new Error();
+        })
+        .populate(['owner', 'likes'])
+        .then((deletedCard) => res.status(SUCCESS_CODE_200).send(deletedCard))
+        .catch(next);
     })
-    .catch((err) => returnError(err, 'card', res, cardId));
+    .catch(next);
 };
 
 // eslint-disable-next-line consistent-return
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
+  console.log(req.headers);
 
   if (!isObjectIdValid(cardId)) {
-    return res.status(ERROR_CODE_400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка' });
+    throw new RequestError('Переданы некорректные данные для постановки/снятии лайка');
   }
   Cards.findByIdAndUpdate(
     cardId,
@@ -55,19 +77,19 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .orFail(() => {
-      res.status(ERROR_CODE_404).send({ message: `Передан несуществующий id (${cardId}) карточки` });
+      throw new NotFoundError(`Передан несуществующий id (${cardId}) карточки`);
     })
     .populate(['owner', 'likes'])
     .then((card) => res.send(card))
-    .catch((err) => returnError(err, 'card', res, cardId));
+    .catch(next);
 };
 
 // eslint-disable-next-line consistent-return
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
 
   if (!isObjectIdValid(cardId)) {
-    return res.status(ERROR_CODE_400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка' });
+    throw new RequestError('Переданы некорректные данные для постановки/снятии лайка');
   }
 
   Cards.findByIdAndUpdate(
@@ -76,9 +98,9 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .orFail(() => {
-      res.status(ERROR_CODE_404).send({ message: `Передан несуществующий id (${cardId}) карточки` });
+      throw new NotFoundError(`Передан несуществующий id (${cardId}) карточки`);
     })
     .populate(['owner', 'likes'])
     .then((card) => res.send(card))
-    .catch((err) => returnError(err, 'card', res, cardId));
+    .catch(next);
 };
