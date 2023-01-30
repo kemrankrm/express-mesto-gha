@@ -1,7 +1,10 @@
 const jwt = require('jsonwebtoken');
-const { ERROR_CODE_401 } = require('../scripts/utils/utils');
+// const { ERROR_CODE_401 } = require('../scripts/utils/utils');
+const { AuthorizationError } = require('../scripts/utils/errors');
 
-const handleAuthError = (res) => res.status(ERROR_CODE_401).send({ message: 'Необходима авторизация' });
+const handleAuthError = () => {
+  throw new AuthorizationError('Необходима авторизация');
+};
 
 const extractBearerToken = (header) => header.replace('Bearer ', '');
 
