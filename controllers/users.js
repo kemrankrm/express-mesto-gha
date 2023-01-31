@@ -38,9 +38,10 @@ module.exports.createUser = (req, res, next) => {
           .then((hash) => Users.create({
             name, about, avatar, email, password: hash,
           }))
-          .then((user) => {
-            user.password = undefined;
-            res.status(SUCCESS_CODE_200).send(user);
+          .then((userData) => {
+            // eslint-disable-next-line no-param-reassign
+            userData.password = undefined;
+            res.status(SUCCESS_CODE_200).send(userData);
           })
           .catch(() => next(new RequestError('Неккоректный запрос')));
       }

@@ -8,7 +8,7 @@ const {
 const {
   NotFoundError,
   RequestError,
-  AuthorizationError, AuthoritiesError,
+  AuthoritiesError,
 } = require('../scripts/utils/errors');
 
 module.exports.getCards = (req, res, next) => {
@@ -20,7 +20,7 @@ module.exports.getCards = (req, res, next) => {
       }
       return res.status(SUCCESS_CODE_200).send(cards);
     })
-    .catch((err) => next(new NotFoundError('Карточки не найдены')));
+    .catch(() => next(new NotFoundError('Карточки не найдены')));
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -28,7 +28,7 @@ module.exports.createCard = (req, res, next) => {
 
   Cards.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
-    .catch((err) => next(new RequestError('Введены неверные данные')));
+    .catch(() => next(new RequestError('Введены неверные данные')));
 };
 
 // eslint-disable-next-line consistent-return

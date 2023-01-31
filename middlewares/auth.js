@@ -8,6 +8,7 @@ const handleAuthError = () => {
 
 const extractBearerToken = (header) => header.replace('Bearer ', '');
 
+// eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
