@@ -47,7 +47,7 @@ module.exports.createUser = (req, res, next) => {
 
       throw err;
     })
-    .catch((err) => res.status(err.statusCode).send(err.message));
+    .catch((err) => res.status(err.statusCode).send({ message: err.message }));
 };
 
 // eslint-disable-next-line consistent-return

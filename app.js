@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const { errors, celebrate, Joi } = require('celebrate');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
-const { apiLimiter } = require('./scripts/utils/utils');
+const { apiLimiter, urlRegexPattern } = require('./scripts/utils/utils');
 const { login, createUser } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 const { catchErrors } = require('./middlewares/errors');
@@ -29,7 +29,7 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
+    avatar: Joi.string().pattern(urlRegexPattern),
     email: Joi.string().email().required(),
     password: Joi.string().required().min(8),
   }),
