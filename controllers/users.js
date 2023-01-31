@@ -20,7 +20,7 @@ module.exports.getUsers = (req, res, next) => {
       }
       return res.status(SUCCESS_CODE_200).send(users);
     })
-    .catch((err) => next(new NotFoundError('Not Found')));
+    .catch(() => next(new NotFoundError('Not Found')));
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -30,12 +30,24 @@ module.exports.createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
 
-  bcrypt.hash(password, 10)
-    .then((hash) => Users.create({
-      name, about, avatar, email, password: hash,
-    }))
-    .then((user) => res.status(SUCCESS_CODE_200).send({ email: user.email, id: user._id }))
-    .catch((err) => next(new RequestError('Неккоректный запрос')));
+  Users.findOne({ email })
+    .then((user) => {
+      console.log('USER', user);
+      if (!user) {
+        return bcrypt.hash(password, 10)
+          .then((hash) => Users.create({
+            name, about, avatar, email, password: hash,
+          }))
+          .then((user) => res.status(SUCCESS_CODE_200).send(user))
+          .catch(() => next(new RequestError('Неккоректный запрос')));
+      }
+
+      const err = new Error('Такой email уже зарегистрирован');
+      err.statusCode = 409;
+
+      throw err;
+    })
+    .catch((err) => res.status(err.statusCode).send(err.message));
 };
 
 // eslint-disable-next-line consistent-return
@@ -59,7 +71,6 @@ module.exports.getProfile = (req, res, next) => {
 module.exports.editProfile = (req, res, next) => {
   console.log('EDIT PROFILE WORKED');
   if (!isObjectIdValid(req.user._id)) {
-    // return res.status(ERROR_CODE_400).res.send({ message: 'User не найден' });
     throw new RequestError('Некорректные данные');
   }
   Users.findByIdAndUpdate(
