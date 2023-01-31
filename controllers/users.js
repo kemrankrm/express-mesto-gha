@@ -38,7 +38,10 @@ module.exports.createUser = (req, res, next) => {
           .then((hash) => Users.create({
             name, about, avatar, email, password: hash,
           }))
-          .then((user) => res.status(SUCCESS_CODE_200).send(user))
+          .then((user) => {
+            delete user.password;
+            res.status(SUCCESS_CODE_200).send(user);
+          })
           .catch(() => next(new RequestError('Неккоректный запрос')));
       }
 
