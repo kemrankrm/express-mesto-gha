@@ -1,4 +1,11 @@
 // eslint-disable-next-line max-classes-per-file
+class AuthoritiesError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = 403;
+  }
+}
+
 class NotFoundError extends Error {
   constructor(message) {
     super(message);
@@ -21,6 +28,7 @@ class RequestError extends Error {
 }
 
 module.exports = {
+  AuthoritiesError,
   NotFoundError,
   AuthorizationError,
   RequestError,

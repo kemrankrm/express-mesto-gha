@@ -8,7 +8,7 @@ const {
 const {
   NotFoundError,
   RequestError,
-  AuthorizationError,
+  AuthorizationError, AuthoritiesError,
 } = require('../scripts/utils/errors');
 
 module.exports.getCards = (req, res, next) => {
@@ -49,7 +49,7 @@ module.exports.deleteCard = (req, res, next) => {
       const currentUserId = `"${req.user._id}"`;
 
       if (cardOwnerId !== currentUserId) {
-        throw new AuthorizationError('Нет прав на удаление этой карты');
+        throw new AuthoritiesError('Нет прав на удаление этой карты');
       }
 
       Cards.deleteOne({ _id: cardId })
