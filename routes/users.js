@@ -4,6 +4,7 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getUsers, getProfile, editProfile, editAvatar, getCurrentProfile,
 } = require('../controllers/users');
+const { urlRegexPattern } = require('../scripts/utils/utils');
 
 usersRouter.get('/', getUsers);
 
@@ -22,6 +23,10 @@ usersRouter.patch('/me', celebrate({
   }).unknown(true),
 }), editProfile);
 
-usersRouter.patch('/me/avatar', editAvatar);
+usersRouter.patch('/me/avatar', celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().required().pattern(urlRegexPattern),
+  }),
+}), editAvatar);
 
 module.exports = usersRouter;
