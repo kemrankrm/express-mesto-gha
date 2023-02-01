@@ -4,8 +4,8 @@ const Users = require('../models/users');
 
 const { SUCCESS_CODE_200 } = require('../scripts/utils/utils');
 
-const NotFoundError = require('../scripts/utils/errors/NotFoundError');
-const AuthorizationError = require('../scripts/utils/errors/AuthorizationError');
+const { NotFoundError } = require('../scripts/utils/errors/NotFoundError');
+const { AuthorizationError } = require('../scripts/utils/errors/AuthorizationError');
 
 module.exports.getUsers = (req, res, next) => {
   Users.find({})
@@ -14,8 +14,6 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  console.log(`Creat USER WORKED WELL with email ${req.body.email}`);
-
   const {
     name, about, avatar, email, password,
   } = req.body;

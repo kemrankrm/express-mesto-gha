@@ -6,9 +6,9 @@ const {
   SUCCESS_CODE_201,
 } = require('../scripts/utils/utils');
 
-const NotFoundError = require('../scripts/utils/errors/NotFoundError');
-const RequestError = require('../scripts/utils/errors/NotFoundError');
-const AuthoritiesError = require('../scripts/utils/errors/AuthoritiesError');
+const { NotFoundError } = require('../scripts/utils/errors/NotFoundError');
+const { RequestError } = require('../scripts/utils/errors/NotFoundError');
+const { AuthoritiesError } = require('../scripts/utils/errors/AuthoritiesError');
 
 module.exports.getCards = (req, res, next) => {
   Cards.find({})
