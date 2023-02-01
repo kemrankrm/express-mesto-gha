@@ -3,6 +3,7 @@ const Cards = require('../models/cards');
 const {
   isObjectIdValid,
   SUCCESS_CODE_200,
+  SUCCESS_CODE_201,
 } = require('../scripts/utils/utils');
 
 const {
@@ -20,15 +21,21 @@ module.exports.getCards = (req, res, next) => {
       }
       return res.status(SUCCESS_CODE_200).send(cards);
     })
-    .catch(() => next(new NotFoundError('Карточки не найдены')));
+    .catch(() => next(new Error('Что-то пошло не так')));
 };
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Cards.create({ name, link, owner: req.user._id })
-    .then((card) => res.send(card))
-    .catch(() => next(new RequestError('Введены неверные данные')));
+    .then((card) => res.status(SUCCESS_CODE_201).send(card))
+    // eslint-disable-next-line consistent-return
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return new RequestError('Введены неверные данные');
+      }
+      next(err);
+    });
 };
 
 // eslint-disable-next-line consistent-return
@@ -45,17 +52,14 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .populate(['owner', 'likes'])
     .then((card) => {
-      const cardOwnerId = JSON.stringify(card.owner._id);
-      const currentUserId = `"${req.user._id}"`;
+      const cardOwnerId = toString(card.owner._id);
+      const currentUserId = `${req.user._id}`;
 
       if (cardOwnerId !== currentUserId) {
         throw new AuthoritiesError('Нет прав на удаление этой карты');
       }
 
       Cards.deleteOne({ _id: cardId })
-        .orFail(() => {
-          throw new Error();
-        })
         .populate(['owner', 'likes'])
         .then((deletedCard) => res.status(SUCCESS_CODE_200).send(deletedCard))
         .catch(next);

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 
 const SUCCESS_CODE_200 = 200;
+const SUCCESS_CODE_201 = 201;
 const ERROR_CODE_401 = 401;
 const PERIOD_MINUTES_10 = 600000;
 
@@ -19,6 +20,7 @@ const apiLimiter = rateLimit({
 
 module.exports = {
   SUCCESS_CODE_200,
+  SUCCESS_CODE_201,
   ERROR_CODE_401,
   urlRegexPattern,
   PERIOD_MINUTES_10,
