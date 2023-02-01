@@ -8,6 +8,7 @@ const { apiLimiter, urlRegexPattern } = require('./scripts/utils/utils');
 const { login, createUser } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 const { catchErrors } = require('./middlewares/errors');
+const { NotFoundError } = require('./scripts/utils/errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 
@@ -39,8 +40,8 @@ app.use(auth);
 
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
-app.use('*', (req, res) => {
-  res.status(404).send({ message: '404 Not found' });
+app.use('*', () => {
+  throw new NotFoundError('404 Not found');
 });
 
 app.get('/', (req, res) => {
