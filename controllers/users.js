@@ -5,7 +5,6 @@ const Users = require('../models/users');
 const { SUCCESS_CODE_200 } = require('../scripts/utils/utils');
 
 const { NotFoundError } = require('../scripts/utils/errors/NotFoundError');
-const { AuthorizationError } = require('../scripts/utils/errors/AuthorizationError');
 const { RegistrationError } = require('../scripts/utils/errors/RegistrationError');
 
 module.exports.getUsers = (req, res, next) => {
@@ -52,7 +51,6 @@ module.exports.getProfile = (req, res, next) => {
 
 // eslint-disable-next-line consistent-return
 module.exports.editProfile = (req, res, next) => {
-  console.log('EDIT PROFILE WORKED');
   Users.findByIdAndUpdate(
     { _id: req.user._id },
     {
