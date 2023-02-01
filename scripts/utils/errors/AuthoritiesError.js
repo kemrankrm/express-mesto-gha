@@ -5,6 +5,6 @@ class AuthoritiesError extends Error {
   }
 }
 
-module.export = {
+module.exports = {
   AuthoritiesError,
 };

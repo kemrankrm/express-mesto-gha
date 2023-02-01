@@ -6,6 +6,7 @@ const { SUCCESS_CODE_200 } = require('../scripts/utils/utils');
 
 const { NotFoundError } = require('../scripts/utils/errors/NotFoundError');
 const { AuthorizationError } = require('../scripts/utils/errors/AuthorizationError');
+const { RegistrationError } = require('../scripts/utils/errors/RegistrationError');
 
 module.exports.getUsers = (req, res, next) => {
   Users.find({})
@@ -27,9 +28,10 @@ module.exports.createUser = (req, res, next) => {
       userData.password = undefined;
       res.status(SUCCESS_CODE_200).send(userData);
     })
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'MongoServerError') {
-        return next(new AuthorizationError('Такой email уже зарегистрирован'));
+        return next(new RegistrationError('Такой email уже зарегистрирован'));
       }
       next(err);
     });

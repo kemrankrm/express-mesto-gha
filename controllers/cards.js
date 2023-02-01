@@ -1,14 +1,13 @@
 const Cards = require('../models/cards');
 
 const {
-  isObjectIdValid,
   SUCCESS_CODE_200,
   SUCCESS_CODE_201,
 } = require('../scripts/utils/utils');
 
+const { AuthoritiesError } = require('../scripts/utils/errors/AuthoritiesError');
 const { NotFoundError } = require('../scripts/utils/errors/NotFoundError');
 const { RequestError } = require('../scripts/utils/errors/NotFoundError');
-const { AuthoritiesError } = require('../scripts/utils/errors/AuthoritiesError');
 
 module.exports.getCards = (req, res, next) => {
   Cards.find({})
@@ -35,17 +34,12 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  if (!isObjectIdValid(cardId)) {
-    throw new RequestError(`Передан некорректный id (${cardId}) карточки для ее удаления`);
-  }
-
   Cards.findById(cardId)
     .orFail(() => {
       throw new NotFoundError(`Передан несуществующий id (${cardId}) карточки`);
     })
-    .populate(['owner', 'likes'])
     .then((card) => {
-      const cardOwnerId = toString(card.owner._id);
+      const cardOwnerId = card.owner.toString();
       const currentUserId = `${req.user._id}`;
 
       if (cardOwnerId !== currentUserId) {
@@ -63,11 +57,7 @@ module.exports.deleteCard = (req, res, next) => {
 // eslint-disable-next-line consistent-return
 module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
-  console.log(req.headers);
 
-  if (!isObjectIdValid(cardId)) {
-    throw new RequestError('Переданы некорректные данные для постановки/снятии лайка');
-  }
   Cards.findByIdAndUpdate(
     cardId,
     { $addToSet: { likes: req.user._id } },
@@ -84,10 +74,6 @@ module.exports.likeCard = (req, res, next) => {
 // eslint-disable-next-line consistent-return
 module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
-
-  if (!isObjectIdValid(cardId)) {
-    throw new RequestError('Переданы некорректные данные для постановки/снятии лайка');
-  }
 
   Cards.findByIdAndUpdate(
     cardId,
