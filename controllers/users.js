@@ -5,62 +5,43 @@ const { CollectionEmptyError } = require('../scripts/components/CollectionEmptyE
 
 const {
   SUCCESS_CODE_200,
-  isObjectIdValid,
+  isObjectIdValid, ERROR_CODE_401,
 } = require('../scripts/utils/utils');
 const { RequestError, NotFoundError, AuthorizationError } = require('../scripts/utils/errors');
 
 module.exports.getUsers = (req, res, next) => {
   Users.find({})
-    .orFail(() => {
-      throw new CollectionEmptyError();
-    })
-    .then((users) => {
-      if (!users.length) {
-        return res.status(SUCCESS_CODE_200).send([]);
-      }
-      return res.status(SUCCESS_CODE_200).send(users);
-    })
-    .catch(() => next(new NotFoundError('Not Found')));
+    .then((users) => res.status(SUCCESS_CODE_200).send(users))
+    .catch((err) => next(err));
 };
 
 module.exports.createUser = (req, res, next) => {
-  console.log('Creat USER WORKED WELL');
+  console.log(`Creat USER WORKED WELL with email ${req.body.email}`);
 
   const {
     name, about, avatar, email, password,
   } = req.body;
 
-  Users.findOne({ email })
-    .then((user) => {
-      console.log('USER', user);
-      if (!user) {
-        return bcrypt.hash(password, 10)
-          .then((hash) => Users.create({
-            name, about, avatar, email, password: hash,
-          }))
-          .then((userData) => {
-            // eslint-disable-next-line no-param-reassign
-            userData.password = undefined;
-            res.status(SUCCESS_CODE_200).send(userData);
-          })
-          .catch(() => next(new RequestError('Неккоректный запрос')));
-      }
-
-      const err = new Error('Такой email уже зарегистрирован');
-      err.statusCode = 409;
-
-      throw err;
+  bcrypt.hash(password, 10)
+    .then((hash) => Users.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then((userData) => {
+      // eslint-disable-next-line no-param-reassign
+      userData.password = undefined;
+      res.status(SUCCESS_CODE_200).send(userData);
     })
-    .catch((err) => res.status(err.statusCode).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'MongoServerError') {
+        return next(new AuthorizationError('Такой email уже зарегистрирован'));
+      }
+      next(err);
+    });
 };
 
 // eslint-disable-next-line consistent-return
 module.exports.getProfile = (req, res, next) => {
   const { id } = req.params;
-  if (!isObjectIdValid(id)) {
-    throw new RequestError(`Передан невалидный ID пользователя ${id}`);
-  }
-
   Users.findById(id)
     .then((user) => {
       if (!user) {
@@ -74,9 +55,6 @@ module.exports.getProfile = (req, res, next) => {
 // eslint-disable-next-line consistent-return
 module.exports.editProfile = (req, res, next) => {
   console.log('EDIT PROFILE WORKED');
-  if (!isObjectIdValid(req.user._id)) {
-    throw new RequestError('Некорректные данные');
-  }
   Users.findByIdAndUpdate(
     { _id: req.user._id },
     {
@@ -133,7 +111,7 @@ module.exports.getCurrentProfile = (req, res, next) => {
   Users.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new AuthorizationError('Ошибка авторизации');
+        throw new NotFoundError('Ошибка авторизации');
       }
 
       return res.status(SUCCESS_CODE_200).send(user);

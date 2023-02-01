@@ -9,6 +9,8 @@ const PERIOD_MINUTES_10 = 600000;
 // eslint-disable-next-line prefer-regex-literals
 const urlRegexPattern = new RegExp(/(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/);
 
+// const uniqueErrorMessage = '';
+
 const isObjectIdValid = (id) => mongoose.Types.ObjectId.isValid(id);
 
 const apiLimiter = rateLimit({

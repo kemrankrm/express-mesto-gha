@@ -15,12 +15,7 @@ const {
 module.exports.getCards = (req, res, next) => {
   Cards.find({})
     .populate(['owner', 'likes'])
-    .then((cards) => {
-      if (!cards.length) {
-        return res.status(SUCCESS_CODE_200).send([]);
-      }
-      return res.status(SUCCESS_CODE_200).send(cards);
-    })
+    .then((cards) => res.status(SUCCESS_CODE_200).send(cards))
     .catch(() => next(new Error('Что-то пошло не так')));
 };
 
