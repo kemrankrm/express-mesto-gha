@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 // const { ERROR_CODE_401 } = require('../scripts/utils/utils');
-const { AuthorizationError } = require('../scripts/utils/errors');
+const { AuthorizationError } = require('../scripts/utils/errors/AuthorizationError');
 
 const handleAuthError = () => new AuthorizationError('Необходима авторизация');
 

@@ -1,13 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Users = require('../models/users');
-const { CollectionEmptyError } = require('../scripts/components/CollectionEmptyError');
 
-const {
-  SUCCESS_CODE_200,
-  isObjectIdValid, ERROR_CODE_401,
-} = require('../scripts/utils/utils');
-const { RequestError, NotFoundError, AuthorizationError } = require('../scripts/utils/errors');
+const { SUCCESS_CODE_200 } = require('../scripts/utils/utils');
+
+const NotFoundError = require('../scripts/utils/errors/NotFoundError');
+const AuthorizationError = require('../scripts/utils/errors/AuthorizationError');
 
 module.exports.getUsers = (req, res, next) => {
   Users.find({})
