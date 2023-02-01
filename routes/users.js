@@ -12,14 +12,14 @@ usersRouter.get('/me', getCurrentProfile);
 
 usersRouter.get('/:id', celebrate({
   params: Joi.object().keys({
-    id: Joi.string().required().length(24),
+    id: Joi.string().required().length(24).hex(),
   }),
 }), getProfile);
 
 usersRouter.patch('/me', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
+    name: Joi.string().min(2).max(30).required(),
+    about: Joi.string().min(2).max(30).required(),
   }).unknown(true),
 }), editProfile);
 
