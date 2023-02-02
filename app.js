@@ -40,9 +40,7 @@ app.use(auth);
 
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
-app.use('*', () => {
-  throw new NotFoundError('404 Not found');
-});
+app.use('*', (next) => next(new NotFoundError('404 Not found')));
 
 app.get('/', (req, res) => {
   res.send('SERVER EXPRESS-MESTO HAS BEEN SUCCESSFULLY STARTED');

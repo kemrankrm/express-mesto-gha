@@ -22,21 +22,18 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => Users.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((userData) => {
-      // eslint-disable-next-line no-param-reassign
-      userData.password = undefined;
+    .then((user) => {
+      const userData = { ...user, password: undefined };
       res.status(SUCCESS_CODE_200).send(userData);
     })
-    // eslint-disable-next-line consistent-return
     .catch((err) => {
-      if (err.name === 'MongoServerError') {
+      if (err.code === 11000) {
         return next(new RegistrationError('Такой email уже зарегистрирован'));
       }
-      next(err);
+      return next(err);
     });
 };
 
-// eslint-disable-next-line consistent-return
 module.exports.getProfile = (req, res, next) => {
   const { id } = req.params;
   Users.findById(id)
@@ -49,13 +46,12 @@ module.exports.getProfile = (req, res, next) => {
     .catch(next);
 };
 
-// eslint-disable-next-line consistent-return
 module.exports.editProfile = (req, res, next) => {
   Users.findByIdAndUpdate(
     { _id: req.user._id },
     {
-      name: req.body.name || '',
-      about: req.body.about || '',
+      name: req.body.name,
+      about: req.body.about,
     },
     {
       runValidators: true,
@@ -76,7 +72,7 @@ module.exports.editAvatar = (req, res, next) => {
 
   Users.findByIdAndUpdate(
     req.user._id,
-    { avatar: avatar || '' },
+    { avatar },
     {
       runValidators: true,
       new: true,

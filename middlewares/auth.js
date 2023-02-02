@@ -1,12 +1,10 @@
 const jwt = require('jsonwebtoken');
-// const { ERROR_CODE_401 } = require('../scripts/utils/utils');
 const { AuthorizationError } = require('../scripts/utils/errors/AuthorizationError');
 
 const handleAuthError = () => new AuthorizationError('Необходима авторизация');
 
 const extractBearerToken = (header) => header.replace('Bearer ', '');
 
-// eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
@@ -20,11 +18,11 @@ const auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'secret-key');
   } catch (err) {
-    next(handleAuthError());
+    return next(handleAuthError());
   }
 
   req.user = payload;
-  next();
+  return next();
 };
 
 module.exports = {
