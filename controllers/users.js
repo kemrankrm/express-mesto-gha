@@ -23,8 +23,10 @@ module.exports.createUser = (req, res, next) => {
       name, about, avatar, email, password: hash,
     }))
     .then((user) => {
-      const userData = { ...user, password: undefined };
-      res.status(SUCCESS_CODE_200).send(userData);
+      const data = user;
+      data.password = undefined;
+
+      res.status(SUCCESS_CODE_200).send(data);
     })
     .catch((err) => {
       if (err.code === 11000) {

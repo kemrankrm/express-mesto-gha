@@ -1,4 +1,4 @@
-module.exports.catchErrors = (err, req, res) => {
+module.exports.catchErrors = (err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
   return res
@@ -9,5 +9,3 @@ module.exports.catchErrors = (err, req, res) => {
         : message,
     });
 };
-
-console.log('asd');
