@@ -9,3 +9,5 @@ module.exports.catchErrors = (err, req, res) => {
         : message,
     });
 };
+
+console.log('asd');
