@@ -13,7 +13,7 @@ module.exports.getCards = (req, res, next) => {
   Cards.find({})
     .populate(['owner', 'likes'])
     .then((cards) => res.status(SUCCESS_CODE_200).send(cards))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -49,7 +49,12 @@ module.exports.deleteCard = (req, res, next) => {
         .then((deletedCard) => res.status(SUCCESS_CODE_200).send(deletedCard))
         .catch(next);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new RequestError('Неверный id карточки'));
+      }
+      next(err);
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -65,7 +70,12 @@ module.exports.likeCard = (req, res, next) => {
     })
     .populate(['owner', 'likes'])
     .then((card) => res.send(card))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new RequestError('Неверный id карточки'));
+      }
+      next(err);
+    });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -81,5 +91,10 @@ module.exports.dislikeCard = (req, res, next) => {
     })
     .populate(['owner', 'likes'])
     .then((card) => res.send(card))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new RequestError('Неверный id карточки'));
+      }
+      next(err);
+    });
 };

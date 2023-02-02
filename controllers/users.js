@@ -33,6 +33,11 @@ module.exports.createUser = (req, res, next) => {
       if (err.code === 11000) {
         return next(new RegistrationError('Такой email уже зарегистрирован'));
       }
+
+      if (err.name === 'ValidationError') {
+        return next(new RequestError('Введены неверные данные'));
+      }
+
       return next(err);
     });
 };
@@ -95,7 +100,13 @@ module.exports.editAvatar = (req, res, next) => {
       throw new NotFoundError('User не найден');
     })
     .then((user) => res.send(user))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return next(new RequestError('Введен неверный URL картинки'));
+      }
+
+      next(err);
+    });
 };
 
 module.exports.login = (req, res, next) => {
