@@ -7,7 +7,7 @@ const {
 
 const { AuthoritiesError } = require('../scripts/utils/errors/AuthoritiesError');
 const { NotFoundError } = require('../scripts/utils/errors/NotFoundError');
-const { RequestError } = require('../scripts/utils/errors/NotFoundError');
+const { RequestError } = require('../scripts/utils/errors/RequestError');
 
 module.exports.getCards = (req, res, next) => {
   Cards.find({})
@@ -23,9 +23,9 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.status(SUCCESS_CODE_201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return new RequestError('Введены неверные данные');
+        return next(new RequestError('Введены неверные данные'));
       }
-      return next(err);
+      next(err);
     });
 };
 

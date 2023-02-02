@@ -6,6 +6,7 @@ const { SUCCESS_CODE_200 } = require('../scripts/utils/utils');
 
 const { NotFoundError } = require('../scripts/utils/errors/NotFoundError');
 const { RegistrationError } = require('../scripts/utils/errors/RegistrationError');
+const { RequestError } = require('../scripts/utils/errors/RequestError');
 
 module.exports.getUsers = (req, res, next) => {
   Users.find({})
@@ -45,7 +46,12 @@ module.exports.getProfile = (req, res, next) => {
       }
       return res.status(SUCCESS_CODE_200).send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new RequestError('Неверные данные id'));
+      }
+      next(err);
+    });
 };
 
 module.exports.editProfile = (req, res, next) => {
@@ -66,7 +72,12 @@ module.exports.editProfile = (req, res, next) => {
     .then((user) => {
       res.status(SUCCESS_CODE_200).send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return next(new RequestError('Формат данных неверный'));
+      }
+      next(err);
+    });
 };
 
 module.exports.editAvatar = (req, res, next) => {
