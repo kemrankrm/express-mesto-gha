@@ -7,6 +7,7 @@ const cardsRouter = require('./routes/cards');
 const { apiLimiter, urlRegexPattern } = require('./scripts/utils/utils');
 const { login, createUser } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { catchErrors } = require('./middlewares/errors');
 const { NotFoundError } = require('./scripts/utils/errors/NotFoundError');
 
@@ -19,6 +20,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
+
+app.use(requestLogger);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -45,6 +48,8 @@ app.use('*', (req, res, next) => next(new NotFoundError('404 Not found')));
 app.get('/', (req, res) => {
   res.send('SERVER EXPRESS-MESTO HAS BEEN SUCCESSFULLY STARTED');
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 
